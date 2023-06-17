@@ -4,22 +4,32 @@
   <title>ChatGPT Website</title>
   <style>
     body {
-      background: linear-gradient(to bottom, lightgreen, lightblue);
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-size: cover;
+      background: linear-gradient(to bottom, #E0F1FF, lightblue);
+    }
+
+    h1 {
+      color: gray;
     }
 
     #header {
-      text-align: right;
+      background-color: white;
+      padding: 20px;
+    }
+
+    #navigation {
+      background-color: lightgray;
       padding: 10px;
     }
 
-    #header a {
-      margin-left: 10px;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
+    #navigation ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #navigation li {
+      display: inline;
+      margin-right: 10px;
     }
 
     #chat-window {
@@ -56,19 +66,42 @@
       border: none;
       cursor: pointer;
     }
+
+    .left-pane {
+      width: 50%;
+      padding: 20px;
+      background-color: white;
+      float: left;
+    }
+
+    .right-pane {
+      width: 50%;
+      padding: 20px;
+      background-color: lightgray;
+      float: left;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <div id="header">
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
+    <h1>ChatGPT Website</h1>
   </div>
 
-  <div id="chat-window">
-    <div id="chat-container"></div>
-    <input type="text" id="message-input" placeholder="Type your message">
-    <button id="send-button">Send</button>
+  <div id="navigation">
+    <ul>
+      <li><a href="index.html" style="color: gray;">Home</a></li>
+      <li><a href="about.html" style="color: gray;">About</a></li>
+      <li><a href="contact.html" style="color: gray;">Contact</a></li>
+    </ul>
+  </div>
+
+  <div id="content">
+    <div id="chat-window">
+      <div id="chat-container"></div>
+      <input type="text" id="message-input" placeholder="Type your message">
+      <button id="send-button">Send</button>
+    </div>
   </div>
 
   <script>
@@ -113,12 +146,6 @@
 
     var sendButton = document.getElementById('send-button');
     sendButton.addEventListener('click', sendMessage);
-    
-    // Display introductory message
-    var chatContainer = document.getElementById('chat-container');
-    var introMessage = document.createElement('p');
-    introMessage.innerText = 'ChatGPT: Hello - Please tell us about your role: Inspector, Regulator, Researcher.';
-    chatContainer.appendChild(introMessage);
   </script>
 </body>
 </html>
