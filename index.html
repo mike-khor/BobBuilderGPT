@@ -88,6 +88,12 @@
           chatResponse.innerText = 'ChatGPT: ' + response;
           chatContainer.appendChild(chatResponse);
           messageInput.value = '';
+
+          if (prompt.toLowerCase() === 'ok') {
+            var followUpMessage = document.createElement('p');
+            followUpMessage.innerText = "Bob: To get started, can you tell me which of these best describe your role in the housing industry - A building inspector, a real estate agent, homeowner, or other? I will try my best to provide the most relevant information to you.";
+            chatContainer.appendChild(followUpMessage);
+          }
         },
         error: function(error) {
           console.log('Error:', error);
@@ -101,8 +107,9 @@
     // Display introductory message
     var chatContainer = document.getElementById('chat-container');
     var introMessage = document.createElement('p');
-    introMessage.innerText = "ChatGPT: Hello! I'm Bob, I'm your housing inspection assistant, and I can answer any questions about building construction and safety rules in California. I've been trained using the California building code rulebook, so you can ask me any questions about building construction rules, violations, inspection questions etc..., and I'll do my best to answer. For example: If you wanted to know how to inspect fire safety implementation in a residential building, you can simply ask: 'What are the fire safety requirements for a house in California'? If you're ready to go ahead, type 'Ok!'";
+    introMessage.innerText = "Bob: Hello! I'm Bob, I'm your housing inspection assistant, and I can answer any questions about building construction and safety rules in California. I've been trained using the California building code rulebook, so you can ask me any questions about building construction rules, violations, inspection questions etc..., and I'll do my best to answer. For example: If you wanted to know how to inspect fire safety implementation in a residential building, you can simply ask: 'What are the fire safety requirements for a house in California'? If you're ready to go ahead, type 'Ok!'";
     chatContainer.appendChild(introMessage);
   </script>
 </body>
 </html>
+
