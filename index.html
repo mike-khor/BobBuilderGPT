@@ -4,7 +4,22 @@
   <title>ChatGPT Website</title>
   <style>
     body {
-      background-color: lightblue;
+      background: linear-gradient(to bottom, lightgreen, lightblue);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    #header {
+      text-align: right;
+      padding: 10px;
+    }
+
+    #header a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
     }
 
     #chat-window {
@@ -45,6 +60,11 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+  <div id="header">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
   <div id="chat-window">
     <div id="chat-container"></div>
     <input type="text" id="message-input" placeholder="Type your message">
@@ -102,5 +122,3 @@
   </script>
 </body>
 </html>
-
-
