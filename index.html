@@ -1,1 +1,64 @@
-'Hello World'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChatGPT API Example</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>ChatGPT API Example</h1>
+
+  <form id="chat-form">
+    <input type="text" id="message-input" placeholder="Enter your message">
+    <button type="submit">Send</button>
+  </form>
+
+  <div id="chat-container"></div>
+
+  <script>
+    // Function to handle form submission
+    function sendMessage(event) {
+      event.preventDefault();
+      
+      var messageInput = document.getElementById('message-input');
+      var message = messageInput.value;
+      
+      if (message.trim() === '') {
+        return;
+      }
+
+      var chatContainer = document.getElementById('chat-container');
+      var userMessage = document.createElement('p');
+      userMessage.innerText = 'You: ' + message;
+      chatContainer.appendChild(userMessage);
+      
+      // Send the message to the ChatGPT API
+      $.ajax({
+        type: 'POST',
+        url: 'https://api.openai.com/v1/chat/completions',
+        headers: {
+          'Authorization': 'Bearer YOUR_API_KEY',
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({
+          'prompt': message,
+          'max_tokens': 50 // Adjust the response length as needed
+        }),
+        success: function(data) {
+          var response = data.choices[0].text.trim();
+          var chatResponse = document.createElement('p');
+          chatResponse.innerText = 'ChatGPT: ' + response;
+          chatContainer.appendChild(chatResponse);
+          messageInput.value = '';
+        },
+        error: function(error) {
+          console.log('Error:', error);
+        }
+      });
+    }
+
+    var chatForm = document.getElementById('chat-form');
+    chatForm.addEventListener('submit', sendMessage);
+  </script>
+</body>
+</html>
+
