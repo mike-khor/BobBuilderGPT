@@ -6,14 +6,16 @@
     body {
       margin: 0;
       padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       background: linear-gradient(to bottom, #E0F1FF, lightblue);
     }
 
     #chat-window {
       width: 400px;
       height: 600px;
-      margin: 0 auto;
-      margin-top: 100px;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -86,6 +88,12 @@
           chatResponse.innerText = 'ChatGPT: ' + response;
           chatContainer.appendChild(chatResponse);
           messageInput.value = '';
+
+          if (prompt.toLowerCase() === 'ok') {
+            var followUpMessage = document.createElement('p');
+            followUpMessage.innerText = "Bob: To get started, can you tell me which of these best describe your role in the housing industry - A building inspector, a real estate agent, homeowner, or other? I will try my best to provide the most relevant information to you.";
+            chatContainer.appendChild(followUpMessage);
+          }
         },
         error: function(error) {
           console.log('Error:', error);
@@ -99,8 +107,9 @@
     // Display introductory message
     var chatContainer = document.getElementById('chat-container');
     var introMessage = document.createElement('p');
-    introMessage.innerText = 'ChatGPT: Hello - Please tell us about your role: Inspector, Regulator, Researcher.';
+    introMessage.innerText = "Bob: Hello! I'm Bob, I'm your housing inspection assistant, and I can answer any questions about building construction and safety rules in California. I've been trained using the California building code rulebook, so you can ask me any questions about building construction rules, violations, inspection questions etc..., and I'll do my best to answer. For example: If you wanted to know how to inspect fire safety implementation in a residential building, you can simply ask: 'What are the fire safety requirements for a house in California'? If you're ready to go ahead, type 'Ok!'";
     chatContainer.appendChild(introMessage);
   </script>
 </body>
 </html>
+
