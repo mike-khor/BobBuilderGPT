@@ -8,6 +8,7 @@ authors = ["Mike Khor <khorenghoe@gmail.com>"]
 python = "^3.9"
 openai = "^0.27.8"
 pinecone-client = "^2.2.2"
+sentence-transformers = "^2.2.2"
 
 [tool.poetry.dev-dependencies]
 

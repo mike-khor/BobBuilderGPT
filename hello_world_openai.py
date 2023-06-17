@@ -5,5 +5,11 @@ import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 list_of_models = openai.Model.list()
 
-print(type(list_of_models))
-print(list_of_models)
+print(
+    sorted(
+        list(
+            m["id"]
+            for m in list_of_models["data"]
+        )
+    )
+)
