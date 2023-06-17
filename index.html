@@ -1,35 +1,13 @@
+Certainly! Here's an example of an HTML code for a website with a light blue background and a ChatGPT window in the middle of the page. The introductory message is "Hello - Please tell us about your role: Inspector, Regulator, Researcher."
+
+```html
 <!DOCTYPE html>
 <html>
 <head>
   <title>ChatGPT Website</title>
   <style>
     body {
-      background: linear-gradient(to bottom, #E0F1FF, lightblue);
-    }
-
-    h1 {
-      color: gray;
-    }
-
-    #header {
-      background-color: white;
-      padding: 20px;
-    }
-
-    #navigation {
-      background-color: lightgray;
-      padding: 10px;
-    }
-
-    #navigation ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    #navigation li {
-      display: inline;
-      margin-right: 10px;
+      background-color: lightblue;
     }
 
     #chat-window {
@@ -66,42 +44,14 @@
       border: none;
       cursor: pointer;
     }
-
-    .left-pane {
-      width: 50%;
-      padding: 20px;
-      background-color: white;
-      float: left;
-    }
-
-    .right-pane {
-      width: 50%;
-      padding: 20px;
-      background-color: lightgray;
-      float: left;
-    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <div id="header">
-    <h1>ChatGPT Website</h1>
-  </div>
-
-  <div id="navigation">
-    <ul>
-      <li><a href="index.html" style="color: gray;">Home</a></li>
-      <li><a href="about.html" style="color: gray;">About</a></li>
-      <li><a href="contact.html" style="color: gray;">Contact</a></li>
-    </ul>
-  </div>
-
-  <div id="content">
-    <div id="chat-window">
-      <div id="chat-container"></div>
-      <input type="text" id="message-input" placeholder="Type your message">
-      <button id="send-button">Send</button>
-    </div>
+  <div id="chat-window">
+    <div id="chat-container"></div>
+    <input type="text" id="message-input" placeholder="Type your message">
+    <button id="send-button">Send</button>
   </div>
 
   <script>
@@ -146,6 +96,23 @@
 
     var sendButton = document.getElementById('send-button');
     sendButton.addEventListener('click', sendMessage);
+    
+    // Display introductory message
+    var chatContainer = document.getElementById('chat-container');
+    var introMessage = document.createElement('p');
+    introMessage.innerText = 'ChatGPT: Hello - Please tell us about your role: Inspector, Regulator, Researcher.';
+    chatContainer.appendChild(introMessage);
   </script>
 </body>
 </html>
+```
+
+In this code, the website has a light blue background color set with the CSS style `body
+
+ { background-color: lightblue; }`. The ChatGPT window is positioned in the middle of the page using the CSS styles `#chat-window { margin: 0 auto; margin-top: 100px; }`.
+
+The introductory message is displayed by creating a new `<p>` element with the text "ChatGPT: Hello - Please tell us about your role: Inspector, Regulator, Researcher." and appending it to the `chatContainer` div.
+
+Remember to replace `'YOUR_API_KEY'` with your actual OpenAI API key.
+
+Feel free to modify the code to suit your needs and add additional styling or features as desired.
