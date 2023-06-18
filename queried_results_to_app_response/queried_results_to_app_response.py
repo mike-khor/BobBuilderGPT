@@ -34,7 +34,9 @@ REQUEST_HEADER = {
 class AppResponseMachine:
     SYSTEM_MESSAGE = (
         "output: a human readable summary of the query results relevant to "
-        "user question, reference relevant sections of the code (bold format: *section code*))"
+        "user question, reference relevant sections of the code (bold format: "
+        "*section code*)). Section codes and text are pulled from our building "
+        "code database (user unaware). Give an apology if no query results."
     )
     def __init__(
         self, user_role, building_type
