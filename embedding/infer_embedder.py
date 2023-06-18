@@ -74,3 +74,10 @@ if __name__ == "__main__":
         namespace=args.pinecone_namespace,
         top_k=args.top_k,
     )
+    # output in stdout is serialized json
+
+    results_serializable = []
+    for result in results:
+        results_serializable.append(result.to_dict())
+
+    print(json.dumps(results_serializable))

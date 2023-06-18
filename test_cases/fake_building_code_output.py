@@ -5,6 +5,7 @@ In one building code pdf file, we have nested components. Here's the rough struc
 class Component:
     id: (node_type, node_id)
     parent_id: (node_type, node_id) --> if root, ("root", 0)
+    title: str
     text: str
 
 The output should be in single-line json format, like so:
@@ -30,7 +31,8 @@ import typing
 class Component:
     id: typing.Tuple[str, int]
     parent_id: typing.Tuple[str, int]
-    text: str
+    title: str  # can be empty string
+    text: str  # can be empty string
 
     def __str__(self):
         return json.dumps(dataclasses.asdict(self))
@@ -74,6 +76,7 @@ def create_fake_building_code_output(
             parent_id=(creating_from, 0),
             # text="".join([random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(num_words)]),
             # make it into some fake words (foo bar baz)
+            title=" ".join([random.choice(["foo", "bar", "baz"]) for _ in range(int(num_words / 3))]),
             text=" ".join([random.choice(["foo", "bar", "baz"]) for _ in range(num_words)]),
         )
         components.append(component)

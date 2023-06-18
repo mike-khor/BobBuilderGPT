@@ -14,7 +14,7 @@ import utils
 
 DEFAULT_TEXT_DATA_PATH = "test_cases/fake_building_code_output.json"
 DEFAULT_EMBEDDING_MODEL_PATH = "embedding/models/fake_embedder_model"
-DEFAULT_NAMESPACE = "example_namespace"
+DEFAULT_NAMESPACE = "example_namespace_2"
 
 # Load and parse the structured text data
 data = []
@@ -24,16 +24,22 @@ with open(DEFAULT_TEXT_DATA_PATH, 'r') as f:
 
 # TODO: this can be parallelized if compute speed matters
 
-# Extract text for vectorization
+# Extract title and text for vectorization
+titles = [item['title'] for item in data]
 texts = [item['text'] for item in data]
 
-# Preprocess the text (optional)
+# Preprocess the text (optional)  TODO: what should our preprocessing be?
+preprocessed_titles = [title.lower() for title in titles]
 preprocessed_texts = [text.lower() for text in texts]
+combined_preprocessed_strs = [
+    preprocessed_title + " " + preprocessed_text
+    for preprocessed_title, preprocessed_text in zip(preprocessed_titles, preprocessed_texts)
+]
 
 # Use a text embedder to generate vector embeddings
 model = SentenceTransformer('distilbert-base-nli-mean-tokens')
 # other options: 'bert-base-nli-mean-tokens', 'roberta-base-nli-mean-tokens', 'distilbert-base-nli-stsb-mean-tokens', 'paraphrase-MiniLM-L6-v2'
-embeddings = model.encode(preprocessed_texts)
+embeddings = model.encode(combined_preprocessed_strs)
 
 # moving the above functions into utils.py
 
@@ -59,6 +65,8 @@ for item, embedding in zip(data, embeddings):
             "id": utils.tuple_to_composite_key(item['id']),  # "node_type_node_id
             "metadata": {
                 "parent_id": utils.tuple_to_composite_key(item['parent_id']),  # "node_type_node_id
+                "title": item['title'],
+                "text": item['text'],
             },
             "values": embedding.tolist(),
         }
