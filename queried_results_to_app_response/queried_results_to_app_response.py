@@ -19,7 +19,6 @@ poetry run python queried_results_to_app_response.py --user_role "building inspe
 
 import argparse
 import sys
-import warnings
 import openai
 import json
 import os
@@ -89,8 +88,6 @@ def prep_input(pinecone_response_list: str):
     # first turn str into list of tuples
     pinecone_response_list = json.loads(pinecone_response_list.replace('\\"', '"'))
     docs = []
-    # warning with pinecone_response_list
-    warnings.warn(f"pinecone_response_list: {pinecone_response_list}")
     for item in pinecone_response_list:
         # item is a dict
         query = item["topic"]

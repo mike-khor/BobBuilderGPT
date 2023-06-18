@@ -49,8 +49,9 @@ def perform_full_loop(
     command_embed = (
         f"python3 ../embedding/infer_embedder.py "
         f"--input_strings {formated_output_ptq} "
-        f"--embedding_model_path='../embedding/models/fake_embedder_model' "
-        f"--pinecone_namespace 'example_namespace_2' "
+        f"--embedding_model_path='../embedding/models/chapter_1_embedder' "
+        "--local_building_code_data_path '../process_pdf_to_jsonl/building_code_output.jsonl' "
+        "--embedding_path '../embedding/embeddings.json'"
     )
     command_embed = shlex.split(command_embed)
     process = subprocess.Popen(command_embed, stdout=subprocess.PIPE)
@@ -113,6 +114,8 @@ def perform_full_loop(
 
     print(output_summarize)
 
+    return output_summarize.decode("utf-8")
+
 
 
 def chat_view(request):
@@ -123,11 +126,14 @@ def chat_view(request):
             building_type = form.cleaned_data['building_type']
             user_message = form.cleaned_data['user_message']
 
-            perform_full_loop(
+            result = perform_full_loop(
                 user_role=user_role,
                 building_type=building_type,
                 user_message=user_message,
             )
+
+            # display result back to user!
+            return render(request, "chat.html", {'form': form, 'result': result})
 
         else:
             print("form is not valid")

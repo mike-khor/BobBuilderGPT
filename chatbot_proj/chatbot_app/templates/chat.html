@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html>
-<body>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit">
-  </form>
-</body>
+    <body>
+        <form id="myForm" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag|linebreaksbr }}<br>
+                    {{ field }}
+                </p>
+            {% endfor %}
+            <input id="submitBtn" type="submit" value="Submit">
+        </form>
+
+        <p><span id="loading" style="display:none;">hold on, let me think...🤔</span></p>
+
+        {% if result %}
+            <p>CQ: {{ result|linebreaksbr }}</p>
+        {% endif %}
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            // Your Javascript code
+            $(document).ready(function(){
+              $('#myForm').on('submit', function(e) {
+                $('#submitBtn').prop('disabled', true);  // optional: disable the submit button to prevent multiple submissions
+                $('#loading').show();
+              });
+            });
+        </script>
+    </body>
 </html>

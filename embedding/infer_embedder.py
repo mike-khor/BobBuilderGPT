@@ -19,6 +19,9 @@ import pinecone
 
 import utils
 
+import sys
+sys.path.append("../")
+
 
 DEFAULT_EMBEDDING_MODEL_PATH = "embedding/models/chapter_1_embedder"
 DEFAULT_EMBEDDING_PATH = "embedding/embeddings.json"
@@ -60,13 +63,6 @@ def query_pinecone(
             )
         )
     return results
-
-
-with open("process_pdf_to_jsonl/building_code_output.jsonl", 'r') as f:
-    data = []
-    for line in f:
-        d = json.loads(line)
-        data.append(d)
 
 
 NODE_TYPES = ["root", "chapter", "article", "section", "subsection", "number", "letter", "subletter", "roman_numeral"]
@@ -154,12 +150,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Vectorize a list of strings.')
     parser.add_argument('--input_strings', nargs='+', help='List of strings to vectorize.')
     parser.add_argument('--embedding_model_path', default=DEFAULT_EMBEDDING_MODEL_PATH, help='Path to embedding model.')
+    parser.add_argument('--embedding_path', default=DEFAULT_EMBEDDING_PATH, help='Path to embedding json file.')
+    parser.add_argument('--local_building_code_data_path', default="process_pdf_to_jsonl/building_code_output.jsonl", help='Path to local data jsonl file.')
     parser.add_argument('--pinecone_index_name', default=PINECONE_INDEX_NAME, help='Name of pinecone index to query.')
     parser.add_argument('--pinecone_environment', default=PINECONE_ENVIRONMENT, help='Name of pinecone environment to query.')
     parser.add_argument('--pinecone_namespace', default=PINECONE_NAMESPACE, help='Name of pinecone namespace to query.')
     parser.add_argument('--top_k', default=5, help='Number of results to return.')
 
     args = parser.parse_args()
+
+    with open(args.local_building_code_data_path, 'r') as f:
+        data = []
+        for line in f:
+            d = json.loads(line)
+            data.append(d)
+
     vectorized_queries = vectorize_queries(args.input_strings, args.embedding_model_path)
     results = query_pinecone(
         vectorized_queries=vectorized_queries,
@@ -174,6 +179,6 @@ if __name__ == "__main__":
     for result in results:
         results_serializable.append(result.to_dict())
 
-    augmented_results = augment_results_with_local_embeddings(results_serializable)
+    augmented_results = augment_results_with_local_embeddings(results_serializable, args.embedding_path)
 
     print(json.dumps(augmented_results))
