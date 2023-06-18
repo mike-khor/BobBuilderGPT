@@ -4,6 +4,10 @@ import subprocess
 import shlex
 import json
 
+import sys
+sys.path.append("../")
+from embedding import utils as embedding_utils
+
 # from django.http import HttpResponse
 
 
@@ -35,6 +39,7 @@ def perform_full_loop(
     output_ptq, error = process.communicate()
 
     print(output_ptq)
+    output_ptq_list = json.loads(output_ptq.decode("utf-8").split("\n")[0])
 
     # next, use infer_embedder.py to convert each line of the output to a vector
     formated_output_ptq = " ".join(output_ptq.decode("utf-8").split("\n"))
@@ -45,7 +50,7 @@ def perform_full_loop(
         f"python3 ../embedding/infer_embedder.py "
         f"--input_strings {formated_output_ptq} "
         f"--embedding_model_path='../embedding/models/fake_embedder_model' "
-
+        f"--pinecone_namespace 'example_namespace_2' "
     )
     command_embed = shlex.split(command_embed)
     process = subprocess.Popen(command_embed, stdout=subprocess.PIPE)
@@ -70,24 +75,43 @@ def perform_full_loop(
     # --initial_user_message INITIAL_USER_MESSAGE
     #                         Initial user message (e.g. What are the structural requirements?)
     # --pinecone_response_list PINECONE_RESPONSE_LIST
-    #                         List of tuples (query, (index, section_text))
 
-    # {'matches': [{'id': 'subletter$114355', 'score': 0.406729311, 'values': [], 'metadata': {'parent_id': 'subletter$0'}},], 'namespace': 'example_namespace'}]
+    # {'matches': [{'id': 'subletter$566860', 'score': 0.330594033, 'values': [], 'metadata': {'parent_id': 'subletter$0', 'text': 'bar baz foo foo baz baz bar baz bar bar bar baz', 'title': 'baz bar baz baz'}},
 
     formatted_output_embed = []
     for i, embed in enumerate(output_embed):
         top_match = embed['matches'][0]
-        formatted_output_embed.append((output_embed[i], (top_match['id'], top_match['metadata']['parent_id'])))
+        formatted_output_embed.append(
+            {
+                "topic": output_ptq_list[i],
+                "index": embedding_utils.composite_key_to_tuple(top_match['id']),
+                "section_text": top_match['metadata']['title'] + ": " + top_match['metadata']['text'],
+            }
+        )
 
-        # TODO: pick off form here
+
+    def serialize_embed_list(embed_list):
+        """
+        input: [{"topic": "water sprinklers", "index": "802.1c", "section_text": "all residential buildings must have 1 sprinkler per household member"}, {"topic": "2 story buildings fire code", "index": "52.1b", "section_text": "New 2-story buildings starting from 1983 must have water sprinklers installed."}]
+        output: "[{\"topic\": \"water sprinklers\", \"index\": \"802.1c\", \"section_text\": \"all residential buildings must have 1 sprinkler per household member\"}, {\"topic\": \"2 story buildings fire code\", \"index\": \"52.1b\", \"section_text\": \"New 2-story buildings starting from 1983 must have water sprinklers installed.\"}]"
+        """
+        return json.dumps(embed_list).replace('"', '\\"')
+
 
     command_summarize = (
         f"python3 ../queried_results_to_app_response/queried_results_to_app_response.py "
         f"--user_role='{str_formatter_for_argparse(user_role)}' "
         f"--building_type='{str_formatter_for_argparse(building_type)}' "
         f"--initial_user_message='{str_formatter_for_argparse(user_message)}' "
-        f"--pinecone_response_list='{str_formatter_for_argparse(output_embed)}' "
+        f"--pinecone_response_list '{serialize_embed_list(formatted_output_embed)}' "
     )
+    print(command_summarize)
+
+    command_summarize = shlex.split(command_summarize)
+    process = subprocess.Popen(command_summarize, stdout=subprocess.PIPE)
+    output_summarize, error = process.communicate()
+
+    print(output_summarize)
 
 
 
