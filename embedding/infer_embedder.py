@@ -9,6 +9,7 @@ poetry run python embedding/infer_embedder.py --input_strings "foo" "bar foo" "b
 """
 
 import argparse
+import copy
 import json
 import os
 import typing
@@ -19,10 +20,11 @@ import pinecone
 import utils
 
 
-DEFAULT_EMBEDDING_MODEL_PATH = "embedding/models/fake_embedder_model"
-PINECONE_INDEX_NAME = "fake-foo-bar-starter"
+DEFAULT_EMBEDDING_MODEL_PATH = "embedding/models/chapter_1_embedder"
+DEFAULT_EMBEDDING_PATH = "embedding/embeddings.json"
+PINECONE_INDEX_NAME = "california-codes"
 PINECONE_ENVIRONMENT = "asia-southeast1-gcp-free"
-PINECONE_NAMESPACE = "example_namespace"
+PINECONE_NAMESPACE = None
 
 
 # Convert list of strings to vectorized queries
@@ -60,6 +62,93 @@ def query_pinecone(
     return results
 
 
+with open("process_pdf_to_jsonl/building_code_output.jsonl", 'r') as f:
+    data = []
+    for line in f:
+        d = json.loads(line)
+        data.append(d)
+
+
+NODE_TYPES = ["root", "chapter", "article", "section", "subsection", "number", "letter", "subletter", "roman_numeral"]
+
+def component_key_to_readable_section(
+    component_id: str,  # composite key
+):
+    """Recursively find the parent, append all levels and titles together to
+    get a readable section."""
+
+    # derive from `data`
+    id_to_embedding = []
+    for d in data:
+        id_to_embedding.append(
+            {
+                "id": utils.tuple_to_composite_key(d["id"]),
+                "metadata": {
+                    "title": d["title"],
+                    "text": d["text"],
+                    "parent_id": utils.tuple_to_composite_key(d["parent_id"]),
+                },
+            }
+        )
+
+    def _get_parent_id_recursive(component_id_list: typing.List[str]):
+        """Recursively get the parent id."""
+        # find the parent id of the component
+        # id_to_embedding is a list of dicts
+        for ref_comp in id_to_embedding:
+            if ref_comp["id"] == component_id_list[-1]:
+                return (
+                    component_id_list
+                    + _get_parent_id_recursive([ref_comp["metadata"]["parent_id"]])
+                )
+
+        return component_id_list
+
+    lineage = reversed(_get_parent_id_recursive([component_id]))
+
+    # get all the titles
+    readable_section = []
+    for component_id in lineage:
+        for ref_comp in id_to_embedding:
+            if ref_comp["id"] == component_id:
+                if len((ref_title := ref_comp["metadata"]["title"]).split(" ")) <= 10:
+                    readable_section.append(ref_title)
+                break
+
+    return " ".join(readable_section)
+
+
+
+def augment_results_with_local_embeddings(
+    results: typing.List[typing.Dict[str, typing.Any]],
+    embedding_path: str = DEFAULT_EMBEDDING_PATH,
+):
+    """Results are missing crucial information like the text, title, and
+    parent_id. We'll augment the results with the local embeddings file."""
+    # load the embeddings from file
+    with open(embedding_path, 'r') as f:
+        id_to_embedding = json.load(f)["vectors"]
+
+    # create a mapping from id to embedding
+    id_to_embedding = {item["id"]: item for item in id_to_embedding}
+
+    # augment the results with the local embeddings
+
+    for result in results:
+        for item in result["matches"]:
+            original_composite_key = copy.copy(item["id"])
+            readable_lineage_itself = component_key_to_readable_section(original_composite_key)
+            readable_lineage_parent = component_key_to_readable_section(id_to_embedding[original_composite_key]["metadata"]["parent_id"])
+            item["id"] = readable_lineage_itself
+            item["metadata"] = {
+                "text": id_to_embedding[original_composite_key]["metadata"]["text"],
+                "title": id_to_embedding[original_composite_key]["metadata"]["title"],
+                "parent_id": readable_lineage_parent,
+            }
+
+    return results
+
+
 # argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Vectorize a list of strings.')
@@ -79,10 +168,12 @@ if __name__ == "__main__":
         namespace=args.pinecone_namespace,
         top_k=args.top_k,
     )
-    # output in stdout is serialized json
 
+    # output in stdout is serialized json
     results_serializable = []
     for result in results:
         results_serializable.append(result.to_dict())
 
-    print(json.dumps(results_serializable))
+    augmented_results = augment_results_with_local_embeddings(results_serializable)
+
+    print(json.dumps(augmented_results))

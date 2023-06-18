@@ -10,6 +10,11 @@ poetry run python queried_results_to_app_response.py --user_role "home inspector
     --building_type residential \
     --initial_user_message "I have a 2-story building with capacity of 4 rooms. How many water sprinklers do I have to install?" \
     --pinecone_response_list "[{\"topic\": \"water sprinklers\", \"index\": \"802.1c\", \"section_text\": \"all residential buildings must have 1 sprinkler per household member\"}, {\"topic\": \"2 story buildings fire code\", \"index\": \"52.1b\", \"section_text\": \"New 2-story buildings starting from 1983 must have water sprinklers installed.\"}]"
+
+poetry run python queried_results_to_app_response.py --user_role "building inspector" \
+    --building_type hospitals \
+    --initial_user_message "What are some checklist items for surgical clinics compliance?" \
+    --pinecone_response_list "[{\"topic\": \"water sprinklers\", \"index\": \"802.1c\", \"section_text\": \"all residential buildings must have 1 sprinkler per household member\"}, {\"topic\": \"2 story buildings fire code\", \"index\": \"52.1b\", \"section_text\": \"New 2-story buildings starting from 1983 must have water sprinklers installed.\"}]"
 """
 
 import argparse

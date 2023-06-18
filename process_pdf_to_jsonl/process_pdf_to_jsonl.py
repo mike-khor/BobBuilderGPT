@@ -22,6 +22,7 @@ text_list = []
 DEFAULT_STARTING_PAGE = 12
 DEFAULT_END_PAGE = 2000
 PDF_PATH = '../2022_ca_designer_collection_1st_ptg_rev.pdf'
+DEFAULT_OUTPUT_FILE="building_code_output.jsonl"
 
 def open_pdf_to_dataframe(
     starting_page: int = DEFAULT_STARTING_PAGE,
@@ -33,6 +34,7 @@ def open_pdf_to_dataframe(
     with open(PDF_PATH, 'rb') as pdf_file:
         reader = PyPDF2.PdfReader(pdf_file)
         for page_number in range(starting_page, ending_page):
+            print(page_number)
             text = reader.pages[page_number].extract_text()
             text_list.append([text])
 
@@ -55,6 +57,9 @@ def process_text(row):
         if match:
             text = match.group(5)
             page_number = match.group(3)
+
+    # any text with " should be modified to be json.loads compatible
+    # text = text.replace('"', "'")
 
     # Return a new row
     return pd.Series([page_number, text])
@@ -117,7 +122,6 @@ def parse_text(
         # found some matches! let's assign a node ID for each first
         node_id = assign_node()
         pattern, title, following_text = match[0], match[1], match[2]
-        breakpoint()
 
         # if level == 3:
         #     print(f"pattern: {pattern}, title: {title}, following_text: {following_text[:300]}")
@@ -131,8 +135,8 @@ def parse_text(
             {
                 "id": [f"{LEVEL_PREFIX}{next_level}", node_id],
                 "parent_id": [f"{LEVEL_PREFIX}{last_parent_node_level}", last_parent_node_id],
-                "text": pattern_clean,
-                "title": title_clean,
+                "text": title_clean,
+                "title": pattern_clean,
             }
         ]
 
@@ -146,13 +150,13 @@ def parse_text(
     return result
 
 
-def write_to_file(components, output_file: str = "building_code_output.jsonl"):
+def write_to_file(components, output_file: str = DEFAULT_OUTPUT_FILE):
     # output should be structured like this:
     # {"id": ["root", 885440], "parent_id": ["root", 0], "title": "bar bar foo bar", "text": "baz bar bar bar bar bar baz foo baz foo bar foo"}
     # {"id": ["chapter", 885440], "parent_id": ["chapter", 0], "title": "bar bar foo bar", "text": "baz bar bar bar bar bar baz foo baz foo bar foo"}
     with open(output_file, "w") as f:
         for component in components:
-            f.write(str(component) + "\n")
+            f.write(json.dumps(component) + "\n")
 
 
 if __name__ == "__main__":
@@ -169,53 +173,57 @@ if __name__ == "__main__":
         '-e', '--ending_page', type=int, default=DEFAULT_END_PAGE,
         help='Ending page number.'
     )
-
+    parser.add_argument(
+        '-o', '--output_file', type=str, default=DEFAULT_OUTPUT_FILE,
+        help='Output file name.'
+    )
 
     args = parser.parse_args()
 
     # if num_processes is more than 1, then we will split the PDF into
     # num_processes chunks, and process each chunk in parallel using the
     # multiprocessing library.
-    if args.num_processes > 1:
-        # Create a list of tuples, each tuple is a starting and ending page
-        # number that we will process in parallel
-        page_ranges = []
-        num_pages = args.ending_page - args.starting_page
-        pages_per_process = num_pages // args.num_processes
-        for i in range(0, args.num_processes):
-            start_page = args.starting_page + i * pages_per_process
-            end_page = start_page + pages_per_process
-            page_ranges.append((start_page, end_page))
+    # if args.num_processes > 1:
+    #     # Create a list of tuples, each tuple is a starting and ending page
+    #     # number that we will process in parallel
+    #     page_ranges = []
+    #     num_pages = args.ending_page - args.starting_page
+    #     pages_per_process = num_pages // args.num_processes
+    #     for i in range(0, args.num_processes):
+    #         start_page = args.starting_page + i * pages_per_process
+    #         end_page = start_page + pages_per_process
+    #         page_ranges.append((start_page, end_page))
 
-        # Add the remainder to the last process
-        page_ranges[-1] = (page_ranges[-1][0], args.ending_page)
+    #     # Add the remainder to the last process
+    #     page_ranges[-1] = (page_ranges[-1][0], args.ending_page)
 
-        # Create a multiprocessing pool and process each of the page ranges
-        pool = multiprocessing.Pool(args.num_processes)
-        results = pool.starmap(open_pdf_to_dataframe, page_ranges)
-        pool.close()
-        pool.join()
+    #     # Create a multiprocessing pool and process each of the page ranges
+    #     pool = multiprocessing.Pool(args.num_processes)
+    #     results = pool.starmap(open_pdf_to_dataframe, page_ranges)
+    #     pool.close()
+    #     pool.join()
 
-        # Combine the results into a single DataFrame
-        df = pd.concat(results, ignore_index=True)
+    #     # Combine the results into a single DataFrame
+    #     df = pd.concat(results, ignore_index=True)
 
-    else:
-        df = open_pdf_to_dataframe(
-            starting_page=args.starting_page,
-            ending_page=args.ending_page,
-        )
+    # else:
+    df = open_pdf_to_dataframe(
+        starting_page=args.starting_page,
+        ending_page=args.ending_page,
+    )
 
     # Apply the function to every row in the DataFrame
     df[['Page', 'Text']] = df.apply(process_text, axis=1)
 
     ca_codes = []
-    for pagenum in range(12, 266):
+    for pagenum in range(len(df)):
         content = df.iloc[pagenum][0]
         ca_codes.append(content)
     ca_concatenated_string = ''.join(ca_codes)
 
     nodes = []
     def assign_node():
+        global nodes
         if len(nodes) == 0:
             nodes.append(60000000)
             return 60000000
@@ -226,4 +234,4 @@ if __name__ == "__main__":
 
 
     ca_parsed_text = parse_text(ca_concatenated_string)
-    write_to_file(ca_parsed_text)
+    write_to_file(ca_parsed_text, output_file=args.output_file)
