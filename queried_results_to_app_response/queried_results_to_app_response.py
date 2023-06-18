@@ -136,5 +136,4 @@ if __name__ == "__main__":
 
     # Printing GPT-4's response
     print(response["choices"][0]["message"]["content"])
-    breakpoint()
     sys.exit(0)
