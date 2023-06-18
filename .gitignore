@@ -16,3 +16,5 @@ lib/
 lib64/
 parts/
 sdist/
+
+.DS_Store
