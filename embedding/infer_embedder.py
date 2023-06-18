@@ -24,11 +24,15 @@ PINECONE_INDEX_NAME = "fake-foo-bar-starter"
 PINECONE_ENVIRONMENT = "asia-southeast1-gcp-free"
 PINECONE_NAMESPACE = "example_namespace"
 
-# Load the embedding model
-model = SentenceTransformer(DEFAULT_EMBEDDING_MODEL_PATH)
 
 # Convert list of strings to vectorized queries
-def vectorize_queries(input_strings):
+def vectorize_queries(
+    input_strings: typing.List[str],
+    embedding_model_path: str = DEFAULT_EMBEDDING_MODEL_PATH,
+):
+    # Load the embedding model
+    model = SentenceTransformer(embedding_model_path)
+
     preprocessed_texts = [text.lower() for text in input_strings]
     embeddings = model.encode(preprocessed_texts)
     return embeddings.tolist()
@@ -60,13 +64,14 @@ def query_pinecone(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Vectorize a list of strings.')
     parser.add_argument('--input_strings', nargs='+', help='List of strings to vectorize.')
+    parser.add_argument('--embedding_model_path', default=DEFAULT_EMBEDDING_MODEL_PATH, help='Path to embedding model.')
     parser.add_argument('--pinecone_index_name', default=PINECONE_INDEX_NAME, help='Name of pinecone index to query.')
     parser.add_argument('--pinecone_environment', default=PINECONE_ENVIRONMENT, help='Name of pinecone environment to query.')
     parser.add_argument('--pinecone_namespace', default=PINECONE_NAMESPACE, help='Name of pinecone namespace to query.')
     parser.add_argument('--top_k', default=5, help='Number of results to return.')
 
     args = parser.parse_args()
-    vectorized_queries = vectorize_queries(args.input_strings)
+    vectorized_queries = vectorize_queries(args.input_strings, args.embedding_model_path)
     results = query_pinecone(
         vectorized_queries=vectorized_queries,
         environment=args.pinecone_environment,
