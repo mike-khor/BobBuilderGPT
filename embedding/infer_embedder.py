@@ -6,6 +6,10 @@ pinecone api key: set as environment variable PINECONE_API_KEY
 
 Example usage: (use foo bar baz)
 poetry run python embedding/infer_embedder.py --input_strings "foo" "bar foo" "baz foo bar"
+
+More relevant example:
+poetry run python embedding/infer_embedder.py --input_strings "hospital sprinklers"
+
 """
 
 import argparse
@@ -93,14 +97,20 @@ def component_key_to_readable_section(
         # id_to_embedding is a list of dicts
         for ref_comp in id_to_embedding:
             if ref_comp["id"] == component_id_list[-1]:
-                return (
-                    component_id_list
-                    + _get_parent_id_recursive([ref_comp["metadata"]["parent_id"]])
-                )
+                # hack: only return something if it's a subsection or below; don't display the root, chapter, or article
+                comp_type = utils.composite_key_to_tuple(ref_comp["id"])[0]  # this is like "level_2" etc
+                comp_type_int = int(comp_type.split("_")[1])
+                if comp_type_int >= 4:
+                    return (
+                        component_id_list
+                        + _get_parent_id_recursive([ref_comp["metadata"]["parent_id"]])
+                    )
+                else:
+                    return component_id_list
 
         return component_id_list
 
-    lineage = reversed(_get_parent_id_recursive([component_id]))
+    lineage = list(reversed(_get_parent_id_recursive([component_id])))
 
     # get all the titles
     readable_section = []
@@ -111,7 +121,21 @@ def component_key_to_readable_section(
                     readable_section.append(ref_title)
                 break
 
-    return " ".join(readable_section)
+    ret = " ".join(readable_section)
+
+    # the first item in lineage is section (e.g. "13-412") -- 13 represents the chapter, 4 represents the article. The section is the full "13-412"
+    # Let's add "Chapter 13, Article 4," to the beginning of the string
+    try:
+        chapter = readable_section[0].split("-")[0]
+        article = readable_section[0].split("-")[1]
+        # here article could be "710.", "2104."
+        # what we need: "7", "21"
+        article = article.split(".")[0][0:-2]
+        ret = f"Chapter {chapter}, Article {article}, " + ret
+    except:
+        pass
+
+    return ret
 
 
 
