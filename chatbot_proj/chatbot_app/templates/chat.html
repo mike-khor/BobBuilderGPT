@@ -1,6 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <body>
+<head>
+    <style>
+        body {
+            background-color: #add8e6;
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            max-width: 600px;
+            padding: 20px;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .header {
+            font-weight: bold;
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+        #submitBtn {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="header">CodeQuery 🦺</div>
         <form id="myForm" method="post">
             {% csrf_token %}
             {% for field in form %}
@@ -17,16 +45,17 @@
         {% if result %}
             <p>CQ: {{ result|linebreaksbr }}</p>
         {% endif %}
+    </div> <!-- Close content div -->
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script>
-            // Your Javascript code
-            $(document).ready(function(){
-              $('#myForm').on('submit', function(e) {
-                $('#submitBtn').prop('disabled', true);  // optional: disable the submit button to prevent multiple submissions
-                $('#loading').show();
-              });
-            });
-        </script>
-    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        // Your Javascript code
+        $(document).ready(function(){
+          $('#myForm').on('submit', function(e) {
+            $('#submitBtn').prop('disabled', true);  // optional: disable the submit button to prevent multiple submissions
+            $('#loading').show();
+          });
+        });
+    </script>
+</body>
 </html>
