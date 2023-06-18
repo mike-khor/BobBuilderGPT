@@ -1,5 +1,7 @@
 # CodeQuery.AI
-![Logo](CQLOGO.svg)
+<div align="center">
+  <img src="CQLOGO.svg" alt="CodeQuery.AI">
+</div>
 
 For CalHacks Hackathon 2023, team members: Mike Khor, Autumn Rains, Eric Danforth, Meera Vinod
 
