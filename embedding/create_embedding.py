@@ -66,7 +66,7 @@ for item, embedding in zip(data, embeddings):
 
 
 # get some information about the embedding, then save it
-print(F"Embedding dimension: {embeddings.shape[1]}")
+print(f"Embedding dimension: {embeddings.shape[1]}")
 print(f"Embedding record count: {embeddings.shape[0]}")
 print(f"Embedding size: {embeddings.size}")
 # save the embedder model
