@@ -50,7 +50,11 @@ We built **CodeQuery** using Python scripts to parse a 4000+ page PDF document. 
 ## What's next for CodeQuery (CQ)
 
 - We intend to continue iterating and improving access and understanding of state building codes and laws.
-- We have several product features to develop as well as additional use cases to research and deploy our product as a solution.
+- We have several product features to develop as well as additional use cases to research and deploy our product as a solution as follows:
+- Expand CodeQuery to cover all 50 states.
+- Allow comparison between multiple state codes.
+- Predict future building code violations incorporating violation reports.
+- AI assistant using computer vision and audio to help building inspectors produce accurate inspection reports faster.
 
 # Application Overview and Architecture
 
