@@ -52,6 +52,9 @@ We built **CodeQuery** using Python scripts to parse a 4000+ page PDF document. 
 - We intend to continue iterating and improving access and understanding of state building codes and laws.
 - We have several product features to develop as well as additional use cases to research and deploy our product as a solution.
 
+# Application Overview and Architecture
+
+
 # Development
 
 Set up your API access tokens in source, for example:
