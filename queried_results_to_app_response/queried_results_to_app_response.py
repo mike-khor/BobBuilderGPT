@@ -6,15 +6,10 @@ poetry run python queried_results_to_app_response.py --user_role architect \
 
 
 a more realistic example:
-poetry run python queried_results_to_app_response.py --user_role "home inspector" \
-    --building_type residential \
-    --initial_user_message "I have a 2-story building with capacity of 4 rooms. How many water sprinklers do I have to install?" \
-    --pinecone_response_list "[{\"topic\": \"water sprinklers\", \"index\": \"802.1c\", \"section_text\": \"all residential buildings must have 1 sprinkler per household member\"}, {\"topic\": \"2 story buildings fire code\", \"index\": \"52.1b\", \"section_text\": \"New 2-story buildings starting from 1983 must have water sprinklers installed.\"}]"
-
 poetry run python queried_results_to_app_response.py --user_role "building inspector" \
     --building_type hospitals \
     --initial_user_message "What are some checklist items for surgical clinics compliance?" \
-    --pinecone_response_list "[{\"topic\": \"water sprinklers\", \"index\": \"802.1c\", \"section_text\": \"all residential buildings must have 1 sprinkler per household member\"}, {\"topic\": \"2 story buildings fire code\", \"index\": \"52.1b\", \"section_text\": \"New 2-story buildings starting from 1983 must have water sprinklers installed.\"}]"
+    --pinecone_response_list "[{\"topic\": \"clinics compliance requirements\", \"content\": [{\"index\": \"802.1c\", \"section_text\": \"all hospitals must have 1 sprinkler per room and hallway\"}]}]"
 """
 
 import argparse
@@ -40,8 +35,11 @@ class AppResponseMachine:
     SYSTEM_MESSAGE = (
         "output: a human readable summary of the query results relevant to "
         "user question, reference relevant sections of the code (bold format: "
-        "*section code*)). Section codes and text are pulled from our building "
-        "code database (user unaware). Give an apology if no query results."
+        "*section code*)). Section codes, title and text are pulled from our building "
+        "code database (user unaware). Give an apology if no relevant results are possible. "
+        "Speak as if data came from yourself. "
+        "You don't have to use every piece of data, just the most relevant ones. "
+        "Correct spelling and grammar, even in codes."
     )
     def __init__(
         self, user_role, building_type
@@ -91,9 +89,8 @@ def prep_input(pinecone_response_list: str):
     for item in pinecone_response_list:
         # item is a dict
         query = item["topic"]
-        index = item["index"]
-        section_text = item["section_text"]
-        docs.append(f"Query: {query}\n\nSection: {index}\n\n{section_text}\n")
+        content_ret = str(item["content"])
+        docs.append(f"Query: {query}\nData: {content_ret}\n")
     return "\n".join(docs)
 
 

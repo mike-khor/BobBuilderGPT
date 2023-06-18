@@ -81,14 +81,16 @@ def perform_full_loop(
 
     formatted_output_embed = []
     for i, embed in enumerate(output_embed):
-        top_match = embed['matches'][0]
-        formatted_output_embed.append(
-            {
-                "topic": output_ptq_list[i],
-                "index": embedding_utils.composite_key_to_tuple(top_match['id']),
-                "section_text": top_match['metadata']['title'] + ": " + top_match['metadata']['text'],
-            }
-        )
+        one_topic_ret = {"topic": output_ptq_list[i], "content": []}
+        for match in embed['matches']:
+            one_topic_ret["content"].append(
+                {
+                    "index": embedding_utils.composite_key_to_tuple(match['id']),
+                    "title": match['metadata']['title'],
+                    "text": match['metadata']['text'],
+                }
+            )
+        formatted_output_embed.append(one_topic_ret)
 
 
     def serialize_embed_list(embed_list):

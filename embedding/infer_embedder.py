@@ -179,7 +179,7 @@ if __name__ == "__main__":
     parser.add_argument('--pinecone_index_name', default=PINECONE_INDEX_NAME, help='Name of pinecone index to query.')
     parser.add_argument('--pinecone_environment', default=PINECONE_ENVIRONMENT, help='Name of pinecone environment to query.')
     parser.add_argument('--pinecone_namespace', default=PINECONE_NAMESPACE, help='Name of pinecone namespace to query.')
-    parser.add_argument('--top_k', default=5, help='Number of results to return.')
+    parser.add_argument('--top_k', default=10, help='Number of results to return.')
 
     args = parser.parse_args()
 
@@ -189,7 +189,9 @@ if __name__ == "__main__":
             d = json.loads(line)
             data.append(d)
 
-    vectorized_queries = vectorize_queries(args.input_strings, args.embedding_model_path)
+    # HACK: combine input strings into just one string
+    combined_input_string = " ".join(args.input_strings)
+    vectorized_queries = vectorize_queries([combined_input_string], args.embedding_model_path)
     results = query_pinecone(
         vectorized_queries=vectorized_queries,
         environment=args.pinecone_environment,
